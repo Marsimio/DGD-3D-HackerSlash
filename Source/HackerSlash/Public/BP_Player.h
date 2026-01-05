@@ -37,6 +37,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Cursor")
 	UStaticMeshComponent* CursorMesh;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawning")
+	UStaticMeshComponent* SpawnRing;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawning")
+	float RingRotationSpeed = 90.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawning")
+	UStaticMeshComponent* SpawnPoint;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Collision", meta=(AllowPrivateAccess="true"))
 	UBoxComponent* BoxCollision;
 
@@ -57,5 +66,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	
+	virtual void RotateRing(float DeltaTime);
+	
+	UFUNCTION(BlueprintCallable, Category="Spawning")
+	AActor* SpawnEnemy(TSubclassOf<AActor> EnemyClass);
 };

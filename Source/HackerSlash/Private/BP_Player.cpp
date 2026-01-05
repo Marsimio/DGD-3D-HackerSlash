@@ -22,6 +22,12 @@ ABP_Player::ABP_Player()
 	
 	CursorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CursorMesh"));
 	CursorMesh->SetupAttachment(BoxCollision);
+	
+	SpawnRing = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpawnRing"));
+	SpawnRing->SetupAttachment(BoxCollision);
+	
+	SpawnPoint = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpawnPoint"));
+	SpawnPoint->SetupAttachment(SpawnRing);
 
 	MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("MovementComponent"));
 }
@@ -49,6 +55,11 @@ void ABP_Player::BeginPlay()
 void ABP_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	if (SpawnRing)
+	{
+		RotateRing(DeltaTime);
+	}
 	
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
@@ -109,4 +120,32 @@ void ABP_Player::LookAt(const FVector& Location) const
 		CursorMesh->SetWorldLocation(TargetLocation);
 	}
 }
+
+
+void ABP_Player::RotateRing(float DeltaTime)
+{
+	FRotator Rotation = FRotator(0.f, RingRotationSpeed * DeltaTime, 0.f);
+	SpawnRing->AddLocalRotation(Rotation);
+}
+
+AActor* ABP_Player::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
+{
+	if (!EnemyClass || !SpawnPoint) return nullptr;
+	
+	const FVector SpawnLocation = SpawnPoint->GetComponentLocation();
+	const FRotator SpawnRotation = SpawnPoint->GetComponentRotation();
+	
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	
+	AActor* SpawnedEnemy = GetWorld()->SpawnActor<AActor>(
+	EnemyClass,
+	SpawnLocation,
+	SpawnRotation,
+	SpawnParams
+	);
+	
+	return SpawnedEnemy;
+}
+
 
