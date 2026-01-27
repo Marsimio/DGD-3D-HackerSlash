@@ -4,13 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "InputMappingContext.h"
-#include "InputAction.h"
-#include "GameFramework/FloatingPawnMovement.h"
 #include "InputActionValue.h"
 #include "BP_Player.generated.h"
 
+class AActor;
+class AEnemy;
 class UBoxComponent;
+class UStaticMeshComponent;
+class UFloatingPawnMovement;
+class UInputMappingContext;
+class UInputAction;
+class UHealthComponent;
 
 USTRUCT(BlueprintType)
 struct FInputActions
@@ -18,6 +22,9 @@ struct FInputActions
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* MovementAction = nullptr;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* AttackAction = nullptr;
 };
 
 UCLASS()
@@ -54,21 +61,34 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement", meta=(AllowPrivateAccess="true"))
     UFloatingPawnMovement* MovementComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UHealthComponent> HealthComp;
 	
-	void Move(const FInputActionValue& Value);
-	void LookAt(const FVector& Location) const;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
+	float fAttackDamage = 25.0f;
 
-protected:
-	virtual void BeginPlay() override;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
+	float fAttackRange = 2000.0f; // max trace distance
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
+	float fAttackRadius = 150.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
+	bool bDrawAttackDebug = true;
 public:	
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
-	virtual void RotateRing(float DeltaTime);
-	
 	UFUNCTION(BlueprintCallable, Category="Spawning")
-	AActor* SpawnEnemy(TSubclassOf<AActor> EnemyClass);
+	AActor* SpawnEnemy(TSubclassOf<AEnemy> EnemyClass);
+	
+private: 
+	void Attack();
+	void LookAt(const FVector& Location) const;
+	void Move(const FInputActionValue& Value);
+	void RotateRing(float DeltaTime);
+	UFUNCTION()
+	void OnPlayerDied(AActor* DeadActor);
+
 };

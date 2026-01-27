@@ -6,9 +6,9 @@
 #include "GameFramework/GameModeBase.h"
 #include "HackNSlashMode.generated.h"
 
-/**
- * 
- */
+class AEnemy;
+class ABP_Player;
+
 UCLASS()
 class HACKERSLASH_API AHackNSlashMode : public AGameModeBase
 {
@@ -24,12 +24,22 @@ public:
 	int32 EnemiesPerWave = 5;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Waves")
-	TSubclassOf<AActor> EnemyBlueprintClass;
+	TSubclassOf<AEnemy> EnemyBlueprintClass; // Subclass of enemy to allow for variants
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Waves")
+	float TimeBetweenSpawns = 0.25f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Waves")
+	float TimeBetweenWaves = 2.0f;
 	
 	UPROPERTY()
-	class ABP_Player* PlayerPawnRef;
+	ABP_Player* PlayerPawnRef;
 		
+private:
 	FTimerHandle EnemySpawnTimer;
+	int32 EnemiesToSpawnThisWave = 0;
+	int32 EnemiesSpawnedThisWave = 0;
+	int32 AliveEnemies = 0;
 	
 	
 protected:
@@ -37,8 +47,11 @@ protected:
 
 	
 public:
-	
+	UFUNCTION()
 	void StartNextWave();
+	UFUNCTION()
 	void SpawnEnemyFromPlayerPoint();
+	UFUNCTION()
+	void HandleEnemyDestroyed(AActor* DestroyedActor);
 	
 };

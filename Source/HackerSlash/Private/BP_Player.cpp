@@ -2,13 +2,21 @@
 
 
 #include "BP_Player.h"
+
+#include "Enemy.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/LocalPlayer.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "HealthComponent.h"
+#include "Engine/OverlapResult.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "InputMappingContext.h"
+#include "InputAction.h"
+#include "GameFramework/FloatingPawnMovement.h"
 
 ABP_Player::ABP_Player()
 {
@@ -30,6 +38,7 @@ ABP_Player::ABP_Player()
 	SpawnPoint->SetupAttachment(SpawnRing);
 
 	MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("MovementComponent"));
+	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComp"));
 }
 
 void ABP_Player::BeginPlay()
@@ -49,6 +58,11 @@ void ABP_Player::BeginPlay()
 				}
 			}
 		}
+	}
+	
+	if (HealthComp)
+	{
+		HealthComp->OnDied.AddDynamic(this, &ABP_Player::OnPlayerDied);
 	}
 }
 
@@ -81,6 +95,10 @@ void ABP_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 		if (InputActions.MovementAction)
 		{
 			EnhancedInputComponent->BindAction(InputActions.MovementAction, ETriggerEvent::Triggered, this, &ABP_Player::Move);
+		}
+		if (InputActions.AttackAction)
+		{
+			EnhancedInputComponent->BindAction(InputActions.AttackAction, ETriggerEvent::Started, this, &ABP_Player::Attack);
 		}
 	}
 }
@@ -128,7 +146,17 @@ void ABP_Player::RotateRing(float DeltaTime)
 	SpawnRing->AddLocalRotation(Rotation);
 }
 
-AActor* ABP_Player::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
+void ABP_Player::OnPlayerDied(AActor* DeadActor)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Player Died"));
+
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		DisableInput(PC);
+	}
+}
+
+AActor* ABP_Player::SpawnEnemy(TSubclassOf<AEnemy> EnemyClass)
 {
 	if (!EnemyClass || !SpawnPoint) return nullptr;
 	
@@ -146,6 +174,57 @@ AActor* ABP_Player::SpawnEnemy(TSubclassOf<AActor> EnemyClass)
 	);
 	
 	return SpawnedEnemy;
+}
+
+
+void ABP_Player::Attack()
+{
+	if (!CursorMesh) return;
+
+	const FVector vAttackOrigin = CursorMesh->GetComponentLocation();
+	const float fRadius = fAttackRadius;
+
+	TArray<FOverlapResult> arrOverlaps;
+
+	FCollisionQueryParams qParams;
+	qParams.AddIgnoredActor(this);
+
+	const bool bHit = GetWorld()->OverlapMultiByChannel(
+		arrOverlaps,
+		vAttackOrigin,
+		FQuat::Identity,
+		ECC_Pawn, // Enemies are Characters (Pawn)
+		FCollisionShape::MakeSphere(fRadius),
+		qParams
+	);
+
+	if (bDrawAttackDebug)
+	{
+		DrawDebugSphere(GetWorld(), vAttackOrigin, fRadius, 24, FColor::Red, false, 0.25f);
+	}
+
+	if (!bHit) return;
+
+	AController* pInstigatorController = Cast<AController>(Controller);
+
+	for (const FOverlapResult& rOverlap : arrOverlaps)
+	{
+		AActor* pHitActor = rOverlap.GetActor();
+		if (!pHitActor) continue;
+
+		AEnemy* pEnemy = Cast<AEnemy>(pHitActor);
+		if (!pEnemy) continue;
+
+		UGameplayStatics::ApplyDamage(
+			pEnemy,
+			fAttackDamage,
+			pInstigatorController,
+			this,
+			UDamageType::StaticClass()
+		);
+
+		UE_LOG(LogTemp, Warning, TEXT("Cursor attack hit %s for %f"), *pEnemy->GetName(), fAttackDamage);
+	}
 }
 
 

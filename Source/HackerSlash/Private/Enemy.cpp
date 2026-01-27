@@ -3,32 +3,127 @@
 
 #include "Enemy.h"
 
-// Sets default values
+#include "AIController.h"
+#include "HealthComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+
 AEnemy::AEnemy()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	AIControllerClass = AAIController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComp"));
+
+	bUseControllerRotationYaw = false;
+	if (UCharacterMovementComponent* MovementComp = GetCharacterMovement())
+	{
+		MovementComp->bOrientRotationToMovement = true;
+	}
 }
 
-// Called when the game starts or when spawned
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	if (HealthComp)
+	{
+		HealthComp->OnDied.AddDynamic(this, &AEnemy::OnEnemyDied);
+	}
+
+	TargetPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 }
 
-// Called every frame
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	CooldownTimer = FMath::Max(0.f, CooldownTimer - DeltaTime);
+
+	if (bIsAttacking)
+	{
+		UpdateAttack(DeltaTime);
+		return;
+	}
+
+	UpdateChase(DeltaTime);
+	TryStartAttack();
 }
 
-// Called to bind functionality to input
-void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AEnemy::UpdateChase(float DeltaTime)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	if (!IsValid(TargetPawn)) return;
+
+	AAIController* AI = Cast<AAIController>(GetController());
+	if (!AI) return;
+
+	RepathTimer += DeltaTime;
+	if (RepathTimer < RepathInterval) return;
+	RepathTimer = 0.0f;
+
+	AI->MoveToActor(TargetPawn, AcceptanceRadius);
+}
+
+
+void AEnemy::TryStartAttack()
+{
+	if (!IsValid(TargetPawn)) return;
+	if (CooldownTimer > 0.f) return;
+
+	const float Dist2D = FVector::Dist2D(GetActorLocation(), TargetPawn->GetActorLocation());
+	if (Dist2D > AttackRange) return;
+
+	StartAttack();
+}
+
+void AEnemy::StartAttack()
+{
 
 }
 
+void AEnemy::UpdateAttack(float DeltaTime)
+{
+
+}
+
+void AEnemy::DoHitCheck()
+{
+
+}
+
+void AEnemy::FaceTarget()
+{
+	if (!IsValid(TargetPawn)) return;
+
+	const FVector ToTarget = TargetPawn->GetActorLocation() - GetActorLocation();
+	const FRotator DesiredYaw(0.f, ToTarget.Rotation().Yaw, 0.f);
+
+	SetActorRotation(DesiredYaw);
+}
+
+void AEnemy::BeginAttackCommon(float InCooldown, float InHitWindow)
+{
+	bIsAttacking = true;
+	bHasHitThisAttack = false;
+	CooldownTimer = InCooldown;
+	HitWindowTimer = InHitWindow;
+
+	if (AAIController* AI = Cast<AAIController>(GetController()))
+	{
+		AI->StopMovement();
+	}
+
+	FaceTarget();
+}
+
+void AEnemy::EndAttackCommon()
+{
+	bIsAttacking = false;
+}
+
+void AEnemy::OnEnemyDied(AActor* DeadActor)
+{
+	Destroy();
+}
