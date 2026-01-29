@@ -23,7 +23,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Waves")
 	int32 EnemiesPerWave = 5;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Waves")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Waves")
 	TSubclassOf<AEnemy> EnemyBlueprintClass; // Subclass of enemy to allow for variants
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Waves")

@@ -22,7 +22,7 @@ public:
 	float MaxHealth = 100.f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Health")
-	float Health = 100.f;
+	float Health = MaxHealth;
 
 	UPROPERTY(BlueprintAssignable, Category="Health")
 	FOnHealthChanged OnHealthChanged;

@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "BP_Player.generated.h"
 
+class UCapsuleComponent;
 class AActor;
 class AEnemy;
 class UBoxComponent;
@@ -34,6 +35,7 @@ class HACKERSLASH_API ABP_Player : public APawn
 
 public:
 	ABP_Player();
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	FInputActions InputActions;
@@ -54,7 +56,7 @@ public:
 	UStaticMeshComponent* SpawnPoint;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Collision", meta=(AllowPrivateAccess="true"))
-	UBoxComponent* BoxCollision;
+	UCapsuleComponent* CapsuleComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Model",  meta=(AllowPrivateAccess="true"))
 	UStaticMeshComponent* PlayerMesh;
@@ -63,6 +65,7 @@ public:
     UFloatingPawnMovement* MovementComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UHealthComponent> HealthComp;
+	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
 	float fAttackDamage = 25.0f;
@@ -75,6 +78,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
 	bool bDrawAttackDebug = true;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Debug")
+	bool bDrawZonesDebug = false;
 public:	
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -85,6 +91,7 @@ public:
 	
 private: 
 	void Attack();
+	void DrawEncircleRings() const;
 	void LookAt(const FVector& Location) const;
 	void Move(const FInputActionValue& Value);
 	void RotateRing(float DeltaTime);

@@ -4,6 +4,7 @@
 #include "BP_Player.h"
 
 #include "Enemy.h"
+#include "EngineUtils.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/PlayerController.h"
@@ -16,23 +17,24 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "InputMappingContext.h"
 #include "InputAction.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
 
 ABP_Player::ABP_Player()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
-	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
-	SetRootComponent(BoxCollision);
+	
+	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BoxCollision"));
+	SetRootComponent(CapsuleComponent);
 
 	PlayerMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlayerMesh"));
-	PlayerMesh->SetupAttachment(BoxCollision);
+	PlayerMesh->SetupAttachment(CapsuleComponent);
 	
 	CursorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CursorMesh"));
-	CursorMesh->SetupAttachment(BoxCollision);
+	CursorMesh->SetupAttachment(CapsuleComponent);
 	
 	SpawnRing = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpawnRing"));
-	SpawnRing->SetupAttachment(BoxCollision);
+	SpawnRing->SetupAttachment(CapsuleComponent);
 	
 	SpawnPoint = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpawnPoint"));
 	SpawnPoint->SetupAttachment(SpawnRing);
@@ -70,6 +72,12 @@ void ABP_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+	if (bDrawZonesDebug)
+	{
+		
+		DrawEncircleRings();
+	}
+	
 	if (SpawnRing)
 	{
 		RotateRing(DeltaTime);
@@ -105,10 +113,7 @@ void ABP_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 void ABP_Player::Move(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Move called!"));
-
 	FVector2D MovementVector = Value.Get<FVector2D>();
-	UE_LOG(LogTemp, Warning, TEXT("Move vector: X=%f, Y=%f"), MovementVector.X, MovementVector.Y);
 
 	if (Controller)
 	{
@@ -225,6 +230,23 @@ void ABP_Player::Attack()
 
 		UE_LOG(LogTemp, Warning, TEXT("Cursor attack hit %s for %f"), *pEnemy->GetName(), fAttackDamage);
 	}
+}
+
+void ABP_Player::DrawEncircleRings() const
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	const FVector Center = GetActorLocation() + FVector(0,0,10.f);
+
+	const float Engage = 80.f;
+	const float R1 = FMath::Max(Engage * 6.f, 120.f);
+	const float R2 = FMath::Max(Engage *15.f,   120.f);
+	const float R3 = FMath::Max(Engage * 30.f, 120.f);
+
+	DrawDebugSphere(World, Center, R1, 64, FColor::Green,  false, 0.f, 0, 2.f);
+	DrawDebugSphere(World, Center, R2, 64, FColor::Yellow, false, 0.f, 0, 2.f);
+	DrawDebugSphere(World, Center, R3, 64, FColor::Red,    false, 0.f, 0, 2.f);
 }
 
 
