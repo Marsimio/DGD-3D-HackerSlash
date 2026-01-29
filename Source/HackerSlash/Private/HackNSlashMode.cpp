@@ -24,60 +24,124 @@ void AHackNSlashMode::BeginPlay()
 
 void AHackNSlashMode::StartNextWave()
 {
-    CurrentWave++;
+	CurrentWaveIndex++;
 
-	EnemiesToSpawnThisWave = EnemiesPerWave * CurrentWave;
+	if (!Waves.IsValidIndex(CurrentWaveIndex))
+	{
+		CurrentWaveIndex = 0;
+	}
+
+	CurrentWave = Waves[CurrentWaveIndex];
+
+	if (CurrentWave.WaveType == EWaveType::Shop)
+	{
+		StartShopWave(CurrentWave);
+		return;
+	}
+
+	StartCombatWave(CurrentWave);
+}
+
+void AHackNSlashMode::StartCombatWave(const FWaveDefinition& WaveDef)
+{
+	EnemiesToSpawnThisWave = WaveDef.EnemyCount;
 	EnemiesSpawnedThisWave = 0;
 
-	GetWorldTimerManager().ClearTimer(EnemySpawnTimer);
-	
+	GetWorldTimerManager().ClearTimer(WaveSpawnTimer);
 	GetWorldTimerManager().SetTimer(
-	EnemySpawnTimer,
-	this,
-	&AHackNSlashMode::SpawnEnemyFromPlayerPoint,
-	TimeBetweenSpawns,
-	true
-);
+		WaveSpawnTimer,
+		this,
+		&AHackNSlashMode::SpawnEnemyFromPlayerPoint,
+		WaveDef.TimeBetweenSpawns,
+		true
+	);
+}
+
+void AHackNSlashMode::StartShopWave(const FWaveDefinition& WaveDef)
+{
+	GetWorldTimerManager().ClearTimer(WaveSpawnTimer);
+
+	OnShopWaveStarted.Broadcast(CurrentWaveIndex + 1);
+
+	GetWorldTimerManager().SetTimer(
+		WaveEndTimer,
+		this,
+		&AHackNSlashMode::StartNextWave,
+		WaveDef.ShopDuration,
+		false
+	);
 }
 
 void AHackNSlashMode::SpawnEnemyFromPlayerPoint()
 {
 	if (EnemiesSpawnedThisWave >= EnemiesToSpawnThisWave)
 	{
-		GetWorldTimerManager().ClearTimer(EnemySpawnTimer); 
+		GetWorldTimerManager().ClearTimer(WaveSpawnTimer);
 		return;
 	}
-	
-	if (PlayerPawnRef && EnemyBlueprintClass)
+
+	if (!PlayerPawnRef) return;
+
+	TSubclassOf<AEnemy> EnemyToSpawn = PickEnemyForWave(CurrentWave);
+	if (!EnemyToSpawn) return;
+
+	AActor* SpawnedEnemy = PlayerPawnRef->SpawnEnemy(EnemyToSpawn);
+	if (!SpawnedEnemy) return;
+
+	EnemiesSpawnedThisWave++;
+	AliveEnemies++;
+
+	SpawnedEnemy->OnDestroyed.AddDynamic(this, &AHackNSlashMode::HandleEnemyDestroyed);
+}
+
+void AHackNSlashMode::HandleEnemyDestroyed(AActor* DestroyedActor) // OnDestroyed expects an actor
+{
+	AliveEnemies = FMath::Max(0, AliveEnemies - 1);
+
+	const bool bAllSpawned = (EnemiesSpawnedThisWave >= EnemiesToSpawnThisWave);
+	if (bAllSpawned && AliveEnemies == 0)
 	{
-		AActor* SpawnedEnemy = PlayerPawnRef->SpawnEnemy(EnemyBlueprintClass);
-		if (SpawnedEnemy)
-		{
-			EnemiesSpawnedThisWave++;
-			AliveEnemies++;
-		
-			SpawnedEnemy->OnDestroyed.AddDynamic(this, &AHackNSlashMode::HandleEnemyDestroyed);
-		}
+		GetWorldTimerManager().SetTimer(
+			WaveEndTimer,
+			this,
+			&AHackNSlashMode::StartNextWave,
+			TimeBetweenWaves,
+			false
+		);
 	}
 }
 
-void AHackNSlashMode::HandleEnemyDestroyed(AActor* DestroyedActor)
+TSubclassOf<AEnemy> AHackNSlashMode::PickEnemyForWave(const FWaveDefinition& WaveDef) const // More weight, more frequency
 {
-	AliveEnemies = FMath::Max(0, AliveEnemies - 1);
-	
-	const bool bAllEnemiesSpawned = (EnemiesSpawnedThisWave >= EnemiesToSpawnThisWave);
-	
-	if (bAllEnemiesSpawned && AliveEnemies == 0)
+	TArray<const FEnemySpawnEntry*> Candidates;
+	float TotalWeight = 0.f;
+
+	for (const FEnemySpawnEntry& E : WaveDef.SpawnTable)
 	{
+		if (!E.EnemyClass) continue;
+		if (CurrentWaveIndex + 1 < E.MinWave) continue;
+		if (CurrentWaveIndex + 1 > E.MaxWave) continue;
+
+		Candidates.Add(&E);
+		TotalWeight += FMath::Max(0.f, E.Weight);
+	}
+
+	if (Candidates.Num() == 0 || TotalWeight <= 0.f)
+	{
+		return nullptr;
+	}
+
+	const float Roll = FMath::FRandRange(0.f, TotalWeight);
+	float Running = 0.f;
+
+	for (const FEnemySpawnEntry* Entry : Candidates)
+	{
+		Running += FMath::Max(0.f, Entry->Weight);
+		if (Roll <= Running)
 		{
-			FTimerHandle NextWaveTimer; //uninitialized
-			GetWorldTimerManager().SetTimer(
-				NextWaveTimer,
-				this,
-				&AHackNSlashMode::StartNextWave,
-				TimeBetweenWaves,
-				false
-			);
+			return Entry->EnemyClass;
 		}
 	}
+
+	return Candidates.Last()->EnemyClass;
 }

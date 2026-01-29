@@ -14,7 +14,6 @@ UCLASS()
 class HACKERSLASH_API AMinotaur : public AGoblin
 {
 	GENERATED_BODY()
-	
 
 public:
 	virtual void BeginPlay() override;
@@ -38,6 +37,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Charge")
 	float ChargeBoxForwardOffset = 140.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Charge")
+	float PostHitChargeTimeCap = 0.4f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Charge")
 	bool bDebugChargeHitbox = true;
@@ -50,6 +52,13 @@ private:
 	bool bHasChargeHit = false;
 	float ChargeTimer = 0.f;
 
+	// pre-charge retainment stats
+	bool  bChargeMoveCached = false;
+	float PreChargeMaxWalkSpeed = 0.f;
+	float PreChargeBrakingFrictionFactor = 0.f;
+	float PreChargeBrakingDecel = 0.f;
+	bool  PreChargeOrientToMovement = true;
+	
 	void StartCharge();
 	void UpdateCharge(float DeltaTime);
 	void StopCharge();

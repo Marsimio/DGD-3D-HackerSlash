@@ -24,6 +24,7 @@ public:
 	void UnregisterEnemy(AEnemy* Enemy);
 
 	FVector GetGoalForEnemy(const AEnemy* Enemy) const;
+	void DrawSwarmDebug() const;
 
 protected:
 
@@ -69,5 +70,5 @@ private:
 
 	void CompactInvalid();
 	int32 GetOrAssignSlot(const AEnemy* Enemy) const;
-	void ComputeRingForSlot(int32 Slot, float& OutRadius, float& OutAngleDeg) const;
+	void ComputeRingForSlot(int32 Slot, float& OutRadius, float& OutAngleDeg, int32& OutRingIndex) const;
 };

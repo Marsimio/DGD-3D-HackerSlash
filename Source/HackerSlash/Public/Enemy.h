@@ -34,7 +34,6 @@ protected:
 	UFUNCTION()
 	void OnEnemyDied(AActor* DeadActor);
 
-	// ---------------- Combat ----------------
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
 	float Damage = 1.0f;
 
@@ -44,10 +43,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
 	float HitWindowDuration = 0.18f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat") // range when enemy is considered "incombat" range
 	float AttackRangeEnter = 180.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat") // range when enemy gets taken out of combat range
 	float AttackRangeExit = 230.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
@@ -55,13 +54,13 @@ protected:
 
 	float AttackLockTimer = 0.f;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI|AttackCommit")
-	float AttackCommitDistance = 140.f;   // how close they try to get before swinging (<= AttackRangeEnter)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI|AttackCommit") // range where the enemy ignores ring pathfinding and rushes in
+	float AttackCommitDistance = 140.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI|AttackCommit")
-	float AttackCommitDuration = 0.25f;   // how long they commit to pushing in
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI|AttackCommit") // breaks off if they dont make it in time
+	float AttackCommitDuration = 0.25f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI|AttackCommit")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI|AttackCommit") // final how far in they want to be in the player
 	float AttackCommitAcceptance = 40.f;
 
 	virtual void TryStartAttack();

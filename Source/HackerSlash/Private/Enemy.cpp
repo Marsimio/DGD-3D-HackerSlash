@@ -17,7 +17,7 @@
 AEnemy::AEnemy()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	PrimaryActorTick.TickInterval = 0.05f;
+	//PrimaryActorTick.TickInterval = 0.05f;
 
 	AIControllerClass = AEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
@@ -74,6 +74,7 @@ void AEnemy::Tick(float DeltaTime)
 	if (bInCombatRange)
 	{
 		TryStartAttack();
+		FaceTarget(DeltaTime);
 		return;
 	}
 
@@ -188,7 +189,6 @@ void AEnemy::BeginAttackCommon(float InCooldown, float InHitWindow)
 
 void AEnemy::UpdateAttack(float DeltaTime)
 {
-	FaceTarget(DeltaTime);
 	
 	HitWindowTimer   = FMath::Max(0.f, HitWindowTimer - DeltaTime);
 	AttackLockTimer  = FMath::Max(0.f, AttackLockTimer - DeltaTime);

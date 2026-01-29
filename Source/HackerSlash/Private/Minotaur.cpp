@@ -29,6 +29,18 @@ void AMinotaur::BeginPlay()
 
 void AMinotaur::StartCharge()
 {
+	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+	{
+		if (!bChargeMoveCached)
+		{
+			bChargeMoveCached = true;
+			PreChargeMaxWalkSpeed = MoveComp->MaxWalkSpeed;
+			PreChargeBrakingFrictionFactor = MoveComp->BrakingFrictionFactor;
+			PreChargeBrakingDecel = MoveComp->BrakingDecelerationWalking;
+			PreChargeOrientToMovement = MoveComp->bOrientRotationToMovement;
+		}
+	}
+	
 	HitActorsThisCharge.Reset();
 	
 	if (!IsValid(TargetPawn))
@@ -86,7 +98,7 @@ void AMinotaur::UpdateCharge(float DeltaTime)
 		DoChargeHitCheck();
 	}
 
-	if (bHasChargeHit || ChargeTimer <= 0.f)
+	if (ChargeTimer <= 0.f)
 	{
 		StopCharge();
 	}
@@ -96,11 +108,29 @@ void AMinotaur::StopCharge()
 {
 	bIsCharging = false;
 
+	if (AAIController* AI = Cast<AAIController>(GetController()))
+	{
+		AI->StopMovement();
+	}
+	
 	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
 	{
-		MoveComp->bOrientRotationToMovement = true;
-		MoveComp->BrakingFrictionFactor = 2.f;
-		MoveComp->BrakingDecelerationWalking = 2048.f;
+		MoveComp->StopMovementImmediately();
+
+		if (bChargeMoveCached)
+		{
+			MoveComp->MaxWalkSpeed = PreChargeMaxWalkSpeed;
+			MoveComp->BrakingFrictionFactor = PreChargeBrakingFrictionFactor;
+			MoveComp->BrakingDecelerationWalking = PreChargeBrakingDecel;
+			MoveComp->bOrientRotationToMovement = PreChargeOrientToMovement;
+		}
+		else
+		{
+			// fallback defaults
+			MoveComp->bOrientRotationToMovement = true;
+			MoveComp->BrakingFrictionFactor = 2.f;
+			MoveComp->BrakingDecelerationWalking = 2048.f;
+		}
 	}
 }
 
@@ -166,5 +196,6 @@ void AMinotaur::DoChargeHitCheck()
 	if (bHitPlayerThisTick)
 	{
 		bHasChargeHit = true;
+		ChargeTimer = FMath::Min(ChargeTimer, PostHitChargeTimeCap);
 	}
 }
