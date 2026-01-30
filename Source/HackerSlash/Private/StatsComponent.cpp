@@ -9,7 +9,6 @@
 #include "GameFramework/FloatingPawnMovement.h"
 
 
-struct FStatMod;
 class UFloatingPawnMovement;
 class UCharacterMovementComponent;
 
@@ -66,7 +65,7 @@ bool UStatsComponent::HasPerk(FName PerkId) const
 	return false;
 }
 
-bool UStatsComponent::AddPerk(const UPerkDataAsset* Perk)
+bool UStatsComponent::AddPerk(UPerkDataAsset* Perk)
 {
 	if (!IsValid(Perk)) return false;
 
@@ -82,7 +81,6 @@ bool UStatsComponent::AddPerk(const UPerkDataAsset* Perk)
 	RebuildStats();
 	return true;
 }
-
 bool UStatsComponent::RemovePerkById(FName PerkId)
 {
 	for (int32 i = 0; i < AppliedPerks.Num(); ++i)

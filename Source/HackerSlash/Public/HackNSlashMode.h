@@ -121,6 +121,8 @@ private:
 	void SpawnEnemyFromPlayerPoint();
 	UFUNCTION()
 	void HandleEnemyDestroyed(AActor* DestroyedActor);
+	UFUNCTION()
+	void OpenOwnedPerksUI();
 	
 	int32 CurrentWaveIndex = -1;
 	FWaveDefinition CurrentWave;

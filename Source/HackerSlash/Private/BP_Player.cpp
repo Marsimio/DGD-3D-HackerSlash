@@ -3,6 +3,7 @@
 
 #include "BP_Player.h"
 
+#include "DebuffComponent.h"
 #include "Enemy.h"
 #include "EngineUtils.h"
 #include "Components/BoxComponent.h"
@@ -12,12 +13,14 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "HealthComponent.h"
+#include "HealthUI.h"
 #include "Engine/OverlapResult.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "InputMappingContext.h"
 #include "InputAction.h"
 #include "PerkComponent.h"
+#include "PerkDataAsset.h"
 #include "StatsComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
@@ -70,15 +73,74 @@ void ABP_Player::BeginPlay()
 	{
 		HealthComp->OnDied.AddDynamic(this, &ABP_Player::OnPlayerDied);
 	}
+	
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		if (HealthWidgetClass && HealthComp)
+		{
+			HealthWidgetInstance = CreateWidget<UHealthUI>(PlayerController, HealthWidgetClass);
+			if (HealthWidgetInstance)
+			{
+				HealthWidgetInstance->AddToViewport();
+				HealthWidgetInstance->InitWithHealthComponent(HealthComp);
+			}
+		}
+	}
 }
 
 void ABP_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	if (bDrawZonesDebug)
+	if (bIsLunging)
 	{
-		
+		const float Step = FMath::Min(DeltaTime, LungeTimeRemaining);
+		LungeTimeRemaining -= Step;
+
+		LungeElapsed += Step;
+
+		const float Alpha = FMath::Clamp(LungeElapsed / LungeTotalDuration, 0.f, 1.f);
+		const float EaseAlpha = Alpha * Alpha * (3.f - 2.f * Alpha);
+
+		const float DesiredDistance = LungeTotalDistance * EaseAlpha;
+
+		const float DeltaDistance = DesiredDistance - LungeDistanceApplied;
+		LungeDistanceApplied = DesiredDistance;
+
+		FHitResult Hit;
+		AddActorWorldOffset(LungeDirection * DeltaDistance, true, &Hit);
+
+		if (Hit.bBlockingHit || LungeTimeRemaining <= 0.f)
+		{
+			bIsLunging = false;
+		}
+	}
+
+	if (bAttackActive)
+	{
+		AttackActiveTimeRemaining -= DeltaTime;
+		ApplySlashDamageTick();
+
+		if (AttackActiveTimeRemaining <= 0.f)
+		{
+			bAttackActive = false;
+		}
+	}
+	
+	if (bAttackActive && bDrawAttackDebug)
+	{
+		const float HitRange = SlashRange;
+		const float Radius   = SlashRadius;
+
+		const FVector Forward = LungeDirection.IsNearlyZero() ? GetActorForwardVector() : LungeDirection.GetSafeNormal();
+		const FVector Origin  = GetActorLocation() + Forward * (HitRange * 0.5f);
+
+		// Visualize the overlap sphere
+		DrawDebugSphere(GetWorld(), Origin, Radius, 24, FColor::Red, false, 0.f);
+
+		// Visualize the arc cone (purely visual)
+		const float HalfAngleRad = FMath::DegreesToRadians(SlashArcDegrees * 0.5f);
+		DrawDebugCone(GetWorld(), GetActorLocation(), Forward, HitRange, HalfAngleRad, HalfAngleRad, 16, FColor::Red, false, 0.f);
 	}
 	
 	if (SpawnRing)
@@ -94,7 +156,6 @@ void ABP_Player::Tick(float DeltaTime)
 			LookAt(HitResult.Location);
 		}
 	}
-
 }
 
 void ABP_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -110,6 +171,10 @@ void ABP_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 		if (InputActions.AttackAction)
 		{
 			EnhancedInputComponent->BindAction(InputActions.AttackAction, ETriggerEvent::Started, this, &ABP_Player::Attack);
+		}
+		if (InputActions.MenuAction)
+		{
+			EnhancedInputComponent->BindAction(InputActions.MenuAction, ETriggerEvent::Started, this, &ABP_Player::OwnedPerksPressed);
 		}
 	}
 }
@@ -164,6 +229,87 @@ void ABP_Player::OnPlayerDied(AActor* DeadActor)
 	}
 }
 
+void ABP_Player::OwnedPerksPressed()
+{
+	OnOwnedPerksRequested.Broadcast();
+}
+
+void ABP_Player::ApplySlashDamageTick()
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	const float Damage = (StatsComp ? StatsComp->GetStat(EGameStatType::Damage) : 1.f);
+
+	const float HitRange = SlashRange;
+	const float Radius   = SlashRadius;
+
+	const FVector Forward = LungeDirection.IsNearlyZero()
+		? GetActorForwardVector()
+		: LungeDirection.GetSafeNormal();
+
+	const FVector Origin = GetActorLocation() + Forward * (HitRange * 0.5f);
+
+	TArray<FOverlapResult> Overlaps;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(ArcSlashTick), false);
+	Params.AddIgnoredActor(this);
+
+	const bool bHit = World->OverlapMultiByChannel(
+		Overlaps,
+		Origin,
+		FQuat::Identity,
+		ECC_Pawn,
+		FCollisionShape::MakeSphere(Radius),
+		Params
+	);
+
+	if (!bHit) return;
+
+	const float CosHalfArc = FMath::Cos(FMath::DegreesToRadians(SlashArcDegrees * 0.5f));
+	AController* InstigatorController = Controller;
+
+	for (const FOverlapResult& O : Overlaps)
+	{
+		AActor* HitActor = O.GetActor();
+		if (!HitActor) continue;
+		if (HitThisSwing.Contains(HitActor)) continue;
+
+		AEnemy* Enemy = Cast<AEnemy>(HitActor);
+		if (!Enemy) continue;
+
+		FVector ToEnemy = Enemy->GetActorLocation() - GetActorLocation();
+		ToEnemy.Z = 0.f;
+
+		if (ToEnemy.Size() > HitRange) continue;
+		if (FVector::DotProduct(Forward, ToEnemy.GetSafeNormal()) < CosHalfArc) continue;
+
+		HitThisSwing.Add(HitActor);
+
+		FVector KnockDir = ToEnemy;
+		if (!KnockDir.Normalize())
+		{
+			KnockDir = Forward;
+		}
+
+		const float KnockStrength = 2800.f;
+		const float KnockDuration = 0.25f;
+
+		if (UDebuffComponent* Debuff = Enemy->FindComponentByClass<UDebuffComponent>())
+		{
+			Debuff->ApplyKnockback(KnockDir, KnockStrength, KnockDuration);
+		}
+
+
+		UGameplayStatics::ApplyDamage(
+			Enemy,
+			Damage,
+			InstigatorController,
+			this,
+			UDamageType::StaticClass()
+		);
+	}
+}
+
 AActor* ABP_Player::SpawnEnemy(TSubclassOf<AEnemy> EnemyClass)
 {
 	if (!EnemyClass || !SpawnPoint) return nullptr;
@@ -187,50 +333,48 @@ AActor* ABP_Player::SpawnEnemy(TSubclassOf<AEnemy> EnemyClass)
 
 void ABP_Player::Attack()
 {
-	if (!CursorMesh) return;
+	UWorld* World = GetWorld();
+	if (!World) return;
 
-	const FVector vAttackOrigin = CursorMesh->GetComponentLocation();
-	const float fRadius = fAttackRadius;
+	if (!bCanAttack) return;
+	bCanAttack = false;
 
-	TArray<FOverlapResult> arrOverlaps;
+	const float Cooldown = (StatsComp ? StatsComp->GetStat(EGameStatType::AttackCooldown) : 1.f);
+	World->GetTimerManager().SetTimer(AttackCooldownTimer, this, &ABP_Player::ResetAttack, Cooldown, false);
 
-	FCollisionQueryParams qParams;
-	qParams.AddIgnoredActor(this);
+	const float MoveSpeed = (StatsComp ? StatsComp->GetStat(EGameStatType::MoveSpeed) : 600.f);
 
-	const bool bHit = GetWorld()->OverlapMultiByChannel(
-		arrOverlaps,
-		vAttackOrigin,
-		FQuat::Identity,
-		ECC_Pawn, // Enemies are Characters (Pawn)
-		FCollisionShape::MakeSphere(fRadius),
-		qParams
-	);
-
-	if (bDrawAttackDebug)
+	FVector Forward = GetActorForwardVector();
+	if (APlayerController* PC = Cast<APlayerController>(Controller))
 	{
-		DrawDebugSphere(GetWorld(), vAttackOrigin, fRadius, 24, FColor::Red, false, 0.25f);
+		FHitResult Hit;
+		if (PC->GetHitResultUnderCursor(ECC_Visibility, false, Hit))
+		{
+			FVector Aim = Hit.Location - GetActorLocation();
+			Aim.Z = 0.f;
+			if (!Aim.IsNearlyZero())
+			{
+				Forward = Aim.GetSafeNormal();
+			}
+		}
 	}
 
-	if (!bHit) return;
+	LungeTotalDistance = MoveSpeed * LungeDistanceMultiplier;
+	LungeTotalDuration = FMath::Max(0.01f, LungeDuration);
+	LungeElapsed = 0.f;
+	LungeDistanceApplied = 0.f;
 
-	AController* pInstigatorController = Cast<AController>(Controller);
+	bIsLunging = true;
+	LungeTimeRemaining = LungeTotalDuration;
+	LungeDirection = Forward;
 
-	for (const FOverlapResult& rOverlap : arrOverlaps)
-	{
-		AActor* pHitActor = rOverlap.GetActor();
-		if (!pHitActor) continue;
+	bAttackActive = true;
+	AttackActiveTimeRemaining = FMath::Max(0.01f, AttackActiveTime);
 
-		AEnemy* pEnemy = Cast<AEnemy>(pHitActor);
-		if (!pEnemy) continue;
+	HitThisSwing.Reset();
+}
 
-		UGameplayStatics::ApplyDamage(
-			pEnemy,
-			fAttackDamage,
-			pInstigatorController,
-			this,
-			UDamageType::StaticClass()
-		);
-
-		UE_LOG(LogTemp, Warning, TEXT("Cursor attack hit %s for %f"), *pEnemy->GetName(), fAttackDamage);
-	}
+void ABP_Player::ResetAttack()
+{
+	bCanAttack = true;
 }

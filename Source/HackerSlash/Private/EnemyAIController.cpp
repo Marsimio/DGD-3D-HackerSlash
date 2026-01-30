@@ -18,7 +18,7 @@ AEnemyAIController::AEnemyAIController(const FObjectInitializer& ObjectInitializ
 		Crowd->SetCrowdSeparationWeight(4.0f);
 
 		// 1000 is usually excessive and can make overreactions
-		Crowd->SetCrowdCollisionQueryRange(550.0f);
+		Crowd->SetCrowdCollisionQueryRange(200.0f);
 
 		Crowd->SetCrowdAnticipateTurns(true);
 	}

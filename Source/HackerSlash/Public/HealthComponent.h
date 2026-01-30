@@ -7,7 +7,9 @@
 #include "HealthComponent.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, UHealthComponent*, Comp, float, NewHealth, float, Delta, AActor*, DamageCauser);
+class UStatsComponent;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, UHealthComponent*, Comp, float, NewHealth, float, Delta,
+                                              AActor*, DamageCauser);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDied, AActor*, DeadActor);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -17,6 +19,12 @@ class HACKERSLASH_API UHealthComponent : public UActorComponent
 
 public:
 	UHealthComponent();
+	
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	UFUNCTION()
+	void HandleStatsChanged();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health")
 	float MaxHealth = 100.f;
@@ -36,11 +44,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Health")
 	bool IsDead() const { return Health <= 0.f; }
 
-protected:
-	virtual void BeginPlay() override;
-
 private:
+	UPROPERTY()
+	TObjectPtr<UStatsComponent> StatsComp = nullptr;
+
+	UPROPERTY(EditAnywhere, Category="Health")
+	bool bUseStatsMaxHealth = true;
+
+	UPROPERTY(EditAnywhere, Category="Health")
+	bool bKeepHealthPercentOnMaxHealthChange = true;
+
 	UFUNCTION()
-	void HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
-							 AController* InstigatedBy, AActor* DamageCauser);
+	void HandleTakeAnyDamage(AActor* DamagedActor, float Damage,
+		const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
 };

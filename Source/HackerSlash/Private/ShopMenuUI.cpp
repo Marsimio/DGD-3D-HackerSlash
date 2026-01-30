@@ -13,16 +13,52 @@
 
 class AHackNSlashMode;
 
-void UShopMenuUI::Init(const TArray<UPerkDataAsset*>& InPerks)
+void UShopMenuUI::InitShop(const TArray<UPerkDataAsset*>& InOffer, UPerkComponent* InPerkComp)
+{
+	PerkComp = InPerkComp;
+
+	if (PerkList)
+	{
+		PerkList->ClearChildren();
+	}
+	
+	if (OwnedPerkList)
+	{
+		OwnedPerkList->ClearChildren();
+	}
+	
+	PopulateOffer(InOffer);
+	PopulateOwned();
+}
+
+void UShopMenuUI::InitOwnedOnly(UPerkComponent* InPerkComp)
+{
+	PerkComp = InPerkComp;
+
+	if (PerkList)
+	{
+		PerkList->ClearChildren();
+		PerkList->SetVisibility(ESlateVisibility::Collapsed);
+	}
+
+	if (OwnedPerkList)
+	{
+		OwnedPerkList->ClearChildren();
+		OwnedPerkList->SetVisibility(ESlateVisibility::Visible);
+	}
+
+	PopulateOwned();
+}
+
+
+void UShopMenuUI::PopulateOffer(const TArray<UPerkDataAsset*>& InOffer)
 {
 	if (!PerkList || !PerkEntryWidgetClass) return;
-
-	PerkList->ClearChildren();
 
 	APlayerController* PlayerController = GetOwningPlayer();
 	if (!PlayerController) return;
 
-	for (UPerkDataAsset* Perk : InPerks)
+	for (UPerkDataAsset* Perk : InOffer)
 	{
 		if (!IsValid(Perk)) continue;
 
@@ -30,12 +66,51 @@ void UShopMenuUI::Init(const TArray<UPerkDataAsset*>& InPerks)
 		if (!Entry) continue;
 
 		Entry->InitPerk(Perk);
+		Entry->SetOwnedMode(false);
 		Entry->OnBuyClicked.AddUObject(this, &UShopMenuUI::HandleBuyPerk);
 
 		PerkList->AddChild(Entry);
 	}
 }
 
+void UShopMenuUI::PopulateOwned()
+{
+	if (!OwnedPerkList || !PerkEntryWidgetClass) return;
+	if (!PerkComp) return;
+
+	APlayerController* PC = GetOwningPlayer();
+	if (!PC) return;
+
+	for (UPerkDataAsset* Owned : PerkComp->OwnedPerks)
+	{
+		if (!IsValid(Owned)) continue;
+
+		UPerkEntryUI* Entry = CreateWidget<UPerkEntryUI>(PC, PerkEntryWidgetClass);
+		if (!Entry) continue;
+
+		Entry->InitPerk(Owned);
+		Entry->SetOwnedMode(true);
+
+		OwnedPerkList->AddChild(Entry);
+	}
+}
+
+void UShopMenuUI::AddOwnedEntry(UPerkDataAsset* Perk)
+{
+	if (!OwnedPerkList || !PerkEntryWidgetClass) return;
+	if (!IsValid(Perk)) return;
+
+	APlayerController* PC = GetOwningPlayer();
+	if (!PC) return;
+
+	UPerkEntryUI* Entry = CreateWidget<UPerkEntryUI>(PC, PerkEntryWidgetClass);
+	if (!Entry) return;
+
+	Entry->InitPerk(Perk);
+	Entry->SetOwnedMode(true);
+
+	OwnedPerkList->AddChild(Entry);
+}
 void UShopMenuUI::HandleBuyPerk(UPerkDataAsset* Perk, UPerkEntryUI* EntryWidget)
 {
 	if (!IsValid(Perk) || !IsValid(EntryWidget)) return;
@@ -43,19 +118,21 @@ void UShopMenuUI::HandleBuyPerk(UPerkDataAsset* Perk, UPerkEntryUI* EntryWidget)
 	APlayerController* PlayerController = GetOwningPlayer();
 	APawn* Pawn = PlayerController ? PlayerController->GetPawn() : nullptr;
 	if (!Pawn) return;
-	
+
 	UPerkComponent* Perks = Pawn->FindComponentByClass<UPerkComponent>();
 	if (!Perks) return;
-	
+
 	if (Perks->ApplyPerk(Perk))
 	{
-		if (AHackNSlashMode* GM = Cast<AHackNSlashMode>(UGameplayStatics::GetGameMode(this)))
+		if (AHackNSlashMode* GameManager = Cast<AHackNSlashMode>(UGameplayStatics::GetGameMode(this)))
 		{
-			GM->RemovePurchasablePerk(Perk);
+			GameManager->RemovePurchasablePerk(Perk);
 		}
 
 		EntryWidget->RemoveFromParent();
-		OnShopClosed.Broadcast(); // left here until proper implementation
+		AddOwnedEntry(Perk);
+
+		OnShopClosed.Broadcast();
 	}
 }
 

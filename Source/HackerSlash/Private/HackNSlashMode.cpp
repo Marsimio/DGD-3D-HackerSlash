@@ -5,6 +5,7 @@
 
 #include "BP_Player.h"
 #include "Enemy.h"
+#include "PerkComponent.h"
 #include "PerkDataAsset.h"
 #include "ShopMenuUI.h"
 #include "Blueprint/UserWidget.h"
@@ -22,6 +23,11 @@ void AHackNSlashMode::BeginPlay()
 	Super::BeginPlay();
 
 	PlayerPawnRef = Cast<ABP_Player>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+
+	if (PlayerPawnRef)
+	{
+		PlayerPawnRef->OnOwnedPerksRequested.AddUObject(this, &AHackNSlashMode::OpenOwnedPerksUI);
+	}
 	StartNextWave();
 }
 
@@ -123,6 +129,38 @@ void AHackNSlashMode::HandleEnemyDestroyed(AActor* DestroyedActor) // OnDestroye
 	}
 }
 
+void AHackNSlashMode::OpenOwnedPerksUI()
+{
+	if (!ShopMenuClass) return;
+
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+	if (!PlayerController || !PlayerPawnRef) return;
+
+	UPerkComponent* PerkComp = PlayerPawnRef->FindComponentByClass<UPerkComponent>();
+	if (!PerkComp) return;
+
+	if (ActiveShopWidget)
+	{
+		CloseShopUI();
+		return;
+	}
+
+	UShopMenuUI* ShopWidget = CreateWidget<UShopMenuUI>(PlayerController, ShopMenuClass);
+	if (!ShopWidget) return;
+
+	ActiveShopWidget = ShopWidget;
+	ShopWidget->OnShopClosed.AddUObject(this, &AHackNSlashMode::CloseShopUI);
+	ShopWidget->AddToViewport();
+
+	ShopWidget->InitOwnedOnly(PerkComp);
+
+	FInputModeUIOnly Mode;
+	Mode.SetWidgetToFocus(ShopWidget->TakeWidget());
+	Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	PlayerController->SetInputMode(Mode);
+	PlayerController->bShowMouseCursor = true;
+}
+
 TArray<UPerkDataAsset*> AHackNSlashMode::BuildShopOffer() const
 {
 	TArray<UPerkDataAsset*> PerkPool;
@@ -159,7 +197,10 @@ void AHackNSlashMode::OpenShopUI()
 	ActiveShopWidget = ShopWidget;
 	ShopWidget->OnShopClosed.AddUObject(this, &AHackNSlashMode::EndShopWaveEarly);
 	ShopWidget->AddToViewport();
-	ShopWidget->Init(BuildShopOffer());
+	APawn* Pawn = PlayerController->GetPawn();
+	UPerkComponent* PerkComp = Pawn ? Pawn->FindComponentByClass<UPerkComponent>() : nullptr;
+
+	ShopWidget->InitShop(BuildShopOffer(), PerkComp);
 
 	FInputModeUIOnly Mode;
 	Mode.SetWidgetToFocus(ShopWidget->TakeWidget());

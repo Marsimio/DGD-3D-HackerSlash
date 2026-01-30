@@ -3,6 +3,7 @@
 
 #include "PerkEntryUI.h"
 #include "PerkDataAsset.h"
+#include "Components/Button.h"
 #include "Components/TextBlock.h"
 
 void UPerkEntryUI::InitPerk(UPerkDataAsset* InPerk)
@@ -19,6 +20,14 @@ void UPerkEntryUI::InitPerk(UPerkDataAsset* InPerk)
 	{
 		PerkDescription->SetText(Perk->Description);
 	}
+}
+
+void UPerkEntryUI::SetOwnedMode(bool bOwned)
+{
+	if (!Purchase) return;
+
+	Purchase->SetVisibility(bOwned ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
+	Purchase->SetIsEnabled(!bOwned);
 }
 
 void UPerkEntryUI::BuyClicked()

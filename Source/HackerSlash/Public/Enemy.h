@@ -9,6 +9,7 @@
 class UHealthComponent;
 class APawn;
 class ASwarmManager;
+class UDebuffComponent;
 
 UCLASS(Blueprintable, BlueprintType)
 class HACKERSLASH_API AEnemy : public ACharacter
@@ -27,7 +28,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UHealthComponent> HealthComp;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UDebuffComponent> DebuffComp;
+	
 	UPROPERTY()
 	TObjectPtr<ASwarmManager> SwarmMgr;
 

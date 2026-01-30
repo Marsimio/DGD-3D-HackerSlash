@@ -24,7 +24,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Shop")
 	void BuyClicked();
-
+	
+	UFUNCTION(BlueprintCallable, Category="Shop")
+	void SetOwnedMode(bool bOwned);
+	
 	FOnBuyClickedNative OnBuyClicked;
 
 protected:
@@ -33,6 +36,9 @@ protected:
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> PerkDescription;
+	
+	UPROPERTY(meta=(BindWidgetOptional))
+	TObjectPtr<UButton> Purchase;
 
 private:
 	UPROPERTY()

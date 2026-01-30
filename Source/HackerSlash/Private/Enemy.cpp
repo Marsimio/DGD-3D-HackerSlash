@@ -3,6 +3,7 @@
 
 #include "Enemy.h"
 
+#include "DebuffComponent.h"
 #include "EnemyAIController.h"
 #include "EngineUtils.h"
 #include "HealthComponent.h"
@@ -23,6 +24,8 @@ AEnemy::AEnemy()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComp"));
+	DebuffComp = CreateDefaultSubobject<UDebuffComponent>(TEXT("DebuffComp"));
+	
 	bUseControllerRotationYaw = false;
 }
 
@@ -56,6 +59,11 @@ void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (DebuffComp && DebuffComp->IsKnockedBack())
+	{
+		return;
+	}
+	
 	CooldownTimer = FMath::Max(0.f, CooldownTimer - DeltaTime);
 
 	if (bIsAttacking)
@@ -79,7 +87,6 @@ void AEnemy::Tick(float DeltaTime)
 	}
 
 	UpdateSwarmMove(DeltaTime);
-	TryStartAttack();
 }
 
 void AEnemy::UpdateSwarmMove(float DeltaTime)
@@ -105,12 +112,12 @@ void AEnemy::UpdateSwarmMove(float DeltaTime)
 		AI->MoveToLocation(PlayerLoc, AttackCommitAcceptance, false);
 		return;
 	}
-	
+
 	RepathTimer += DeltaTime;
 	if (RepathTimer < RepathInterval) return;
 	RepathTimer = 0.f;
 
-	FVector Goal = SwarmMgr->GetGoalForEnemy(this);
+	const FVector Goal = SwarmMgr->GetGoalForEnemy(this);
 
 	if (!LastGoal.IsZero() && FVector::Dist2D(Goal, LastGoal) < GoalUpdateMinDist)
 	{
@@ -221,7 +228,7 @@ void AEnemy::EndAttackCommon()
 		}
 	}
 
-	if (AAIController* AI = Cast<AAIController>(GetController()))
+	if (AEnemyAIController* AI = Cast<AEnemyAIController>(GetController()))
 	{
 		if (UCrowdFollowingComponent* Crowd = Cast<UCrowdFollowingComponent>(AI->GetPathFollowingComponent()))
 		{

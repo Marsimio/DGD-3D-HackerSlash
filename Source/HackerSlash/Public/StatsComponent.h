@@ -2,12 +2,11 @@
 
 #pragma once
 
+#include "PerkDataAsset.h"
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "PerkDataAsset.h"
 #include "StatsComponent.generated.h"
-
-enum class EGameStatType : uint8;
-class UPerkDataAsset;
 
 USTRUCT(BlueprintType)
 struct FStatBlock
@@ -34,8 +33,8 @@ struct FAppliedPerk
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<const UPerkDataAsset> Perk = nullptr;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    TObjectPtr<UPerkDataAsset> Perk = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName PerkId;
@@ -76,7 +75,7 @@ public:
 	const FStatBlock& GetFinalStats() const { return FinalStats; }
 
 	UFUNCTION(BlueprintCallable, Category="Stats|Perks")
-	bool AddPerk(const UPerkDataAsset* Perk);
+	bool AddPerk(UPerkDataAsset* Perk);
 
 	UFUNCTION(BlueprintCallable, Category="Stats|Perks")
 	bool RemovePerkById(FName PerkId);

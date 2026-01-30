@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "BP_Player.generated.h"
 
+class UHealthUI;
 class UPerkComponent;
 class UStatsComponent;
 class UCapsuleComponent;
@@ -28,7 +29,15 @@ struct FInputActions
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* AttackAction = nullptr;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* MenuAction = nullptr;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* HealAction = nullptr;
 };
+
+DECLARE_MULTICAST_DELEGATE(FOnOwnedPerksRequested);
 
 UCLASS()
 class HACKERSLASH_API ABP_Player : public APawn
@@ -38,7 +47,12 @@ class HACKERSLASH_API ABP_Player : public APawn
 public:
 	ABP_Player();
 	
+	UPROPERTY(EditAnywhere, Category="UI")
+	TSubclassOf<UHealthUI> HealthWidgetClass;
 
+	UPROPERTY()
+	UHealthUI* HealthWidgetInstance;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	FInputActions InputActions;
 
@@ -72,21 +86,29 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UPerkComponent> PerkComp;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
-	float fAttackDamage = 25.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat|Slash")
+	float SlashArcDegrees = 90.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat|Slash")
+	float SlashRange = 250.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
-	float fAttackRange = 2000.0f; // max trace distance
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat|Slash")
+	float SlashRadius = 120.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat|Lunge")
+	float LungeSpeed = 1800.f;
+
+	FVector LungeVelocity = FVector::ZeroVector;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
-	float fAttackRadius = 150.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
-	bool bDrawAttackDebug = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat|Lunge")
+	float LungeDuration = 0.28f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Debug")
-	bool bDrawZonesDebug = false;
-public:	
+	bool bDrawAttackDebug = true;
+
+	bool bIsLunging = false;
+	float LungeTimeRemaining = 0.f;
+	FVector LungeDirection = FVector::ZeroVector;
+	
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -94,12 +116,40 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Spawning")
 	AActor* SpawnEnemy(TSubclassOf<AEnemy> EnemyClass);
 	
+	FOnOwnedPerksRequested OnOwnedPerksRequested;
+	
 private: 
+	bool bCanAttack = true;
+
+	FTimerHandle AttackCooldownTimer;
+
+	void ResetAttack();
+	
 	void Attack();
 	void LookAt(const FVector& Location) const;
 	void Move(const FInputActionValue& Value);
 	void RotateRing(float DeltaTime);
 	UFUNCTION()
 	void OnPlayerDied(AActor* DeadActor);
+	UFUNCTION()
+	void OwnedPerksPressed();
 
+	// Lunge/attack window
+	bool bAttackActive = false;
+	float AttackActiveTimeRemaining = 0.f;
+
+	float LungeTotalDuration = 0.f;
+	float LungeElapsed = 0.f;
+	float LungeTotalDistance = 0.f;
+	float LungeDistanceApplied = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat|Lunge", meta=(AllowPrivateAccess="true"))
+	float LungeDistanceMultiplier = 0.6f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat|Slash", meta=(AllowPrivateAccess="true"))
+	float AttackActiveTime = 0.12f;
+
+	TSet<TWeakObjectPtr<AActor>> HitThisSwing;
+
+	void ApplySlashDamageTick();
 };

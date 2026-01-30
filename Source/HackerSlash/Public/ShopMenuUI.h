@@ -9,6 +9,7 @@
 class UPerkEntryUI;
 class UScrollBox;
 class UPerkDataAsset;
+class UPerkComponent;
 
 DECLARE_MULTICAST_DELEGATE(FOnShopClosedNative);
 
@@ -19,20 +20,34 @@ class HACKERSLASH_API UShopMenuUI : public UUserWidget
 
 public:
 	UFUNCTION(BlueprintCallable, Category="Shop")
-	void Init(const TArray<UPerkDataAsset*>& InPerks);
+	void InitShop(const TArray<UPerkDataAsset*>& InOffer, UPerkComponent* InPerkComp);
+
+	// Owned-only view
+	UFUNCTION(BlueprintCallable, Category="Shop")
+	void InitOwnedOnly(UPerkComponent* InPerkComp);
 
 	UFUNCTION(BlueprintCallable, Category="Shop")
 	void CloseClicked();
-	
+
 	FOnShopClosedNative OnShopClosed;
 
 protected:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UScrollBox> PerkList;
-	
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UScrollBox> OwnedPerkList;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Shop")
 	TSubclassOf<UPerkEntryUI> PerkEntryWidgetClass;
 
 private:
+	UPROPERTY()
+	TObjectPtr<UPerkComponent> PerkComp;
+	
+	void PopulateOffer(const TArray<UPerkDataAsset*>& InOffer);
+	void PopulateOwned();
+	void AddOwnedEntry(UPerkDataAsset* Perk);
+	
 	void HandleBuyPerk(UPerkDataAsset* Perk, UPerkEntryUI* EntryWidget);
 };
