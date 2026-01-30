@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "HackNSlashMode.generated.h"
 
+class UShopMenuUI;
+class UPerkDataAsset;
 class AEnemy;
 class ABP_Player;
 
@@ -67,6 +69,15 @@ class HACKERSLASH_API AHackNSlashMode : public AGameModeBase
 public:
 	AHackNSlashMode();
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Shop")
+	TSubclassOf<UUserWidget> ShopMenuClass;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Shop")
+	TArray<TObjectPtr<UPerkDataAsset>> PurchasablePerks;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Shop", meta=(ClampMin="1"))
+	int32 PerksOfferedPerShop = 3;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Waves")
 	TArray<FWaveDefinition> Waves;
 	
@@ -82,9 +93,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Waves")
 	float TimeBetweenWaves = 2.0f;
 	
-	UPROPERTY()
-	ABP_Player* PlayerPawnRef;
-	
 	UFUNCTION(BlueprintCallable, Category="Waves")
 	void StartNextWave();
 
@@ -94,14 +102,27 @@ public:
 		GetWorldTimerManager().ClearTimer(WaveEndTimer);
 		StartNextWave();
 	}
-
+	
+	UFUNCTION(BlueprintCallable, Category="Shop")
+	void RemovePurchasablePerk(UPerkDataAsset* Perk);
+	
+	void EndShopWaveEarly();
 		
 private:
 	
 	virtual void BeginPlay() override;
 	
+	UPROPERTY()
+	TObjectPtr<UShopMenuUI> ActiveShopWidget;
+	UPROPERTY()
+	ABP_Player* PlayerPawnRef;
+	
+	UFUNCTION()
+	void SpawnEnemyFromPlayerPoint();
+	UFUNCTION()
+	void HandleEnemyDestroyed(AActor* DestroyedActor);
+	
 	int32 CurrentWaveIndex = -1;
-
 	FWaveDefinition CurrentWave;
 
 	int32 EnemiesToSpawnThisWave = 0;
@@ -113,12 +134,10 @@ private:
 
 	void StartCombatWave(const FWaveDefinition& WaveDef);
 	void StartShopWave(const FWaveDefinition& WaveDef);
-
-	UFUNCTION()
-	void SpawnEnemyFromPlayerPoint();
-
-	UFUNCTION()
-	void HandleEnemyDestroyed(AActor* DestroyedActor);
+	
+	TArray<UPerkDataAsset*> BuildShopOffer() const;
+	void OpenShopUI();
+	void CloseShopUI();
 
 	TSubclassOf<AEnemy> PickEnemyForWave(const FWaveDefinition& WaveDef) const;
 

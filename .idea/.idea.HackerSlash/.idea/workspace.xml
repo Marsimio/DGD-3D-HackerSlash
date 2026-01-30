@@ -13,19 +13,13 @@
   <component name="ChangeListManager">
     <list default="true" id="2f0ac21f-0f0e-499c-8af8-0a26510d3b68" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.HackerSlash/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.HackerSlash/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/BP_HackNSlash.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/BP_HackNSlash.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Enemies/BP_Minotaur.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Enemies/BP_Minotaur.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Enemies/Wizard/BP_Wizard.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Enemies/Wizard/BP_Wizard.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Levels/SlashWorld.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Levels/SlashWorld.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Private/Enemy.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Private/Enemy.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Player/MainChar.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Player/MainChar.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/HackerSlash.uproject" beforeDir="false" afterPath="$PROJECT_DIR$/HackerSlash.uproject" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Private/BP_Player.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Private/BP_Player.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Private/HackNSlashMode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Private/HackNSlashMode.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Private/Minotaur.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Private/Minotaur.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Private/SwarmManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Private/SwarmManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Public/Enemy.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Public/Enemy.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Public/BP_Player.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Public/BP_Player.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Public/HackNSlashMode.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Public/HackNSlashMode.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Public/Minotaur.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Public/Minotaur.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Public/SwarmManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Public/SwarmManager.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,15 +38,23 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Core/Private/Misc/App.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Core/Public/Containers/Map.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Core/Public/Misc/SecureHash.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Core/Public/Stats/Stats.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/Actor.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/Pawn.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Private/Components/ActorComponent.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/NavigationSystem/Public/NavigationSystem.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/UMG/Private/UserWidget.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/Goblin.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/HackNSlashMode.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/MyGameInstance.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/PerkEntryUI.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/Wizard.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/Goblin.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/MyGameInstance.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/PerkEntryUI.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/Wizard.h" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="McpProjectServerCommands">
@@ -203,7 +205,7 @@
       <workItem from="1769525582953" duration="909000" />
       <workItem from="1769526735779" duration="268000" />
       <workItem from="1769527736426" duration="935000" />
-      <workItem from="1769528728907" duration="65366000" />
+      <workItem from="1769528728907" duration="84803000" />
     </task>
     <servers />
   </component>

@@ -5,6 +5,10 @@
 
 #include "BP_Player.h"
 #include "Enemy.h"
+#include "PerkDataAsset.h"
+#include "ShopMenuUI.h"
+#include "Blueprint/UserWidget.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
 AHackNSlashMode::AHackNSlashMode()
@@ -18,12 +22,16 @@ void AHackNSlashMode::BeginPlay()
 	Super::BeginPlay();
 
 	PlayerPawnRef = Cast<ABP_Player>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
-
 	StartNextWave();
 }
 
 void AHackNSlashMode::StartNextWave()
 {
+	if (CurrentWaveIndex >= 0)
+	{
+		OnWaveEnded.Broadcast(CurrentWaveIndex + 1);
+	}
+	
 	CurrentWaveIndex++;
 
 	if (!Waves.IsValidIndex(CurrentWaveIndex))
@@ -36,7 +44,6 @@ void AHackNSlashMode::StartNextWave()
 	if (CurrentWave.WaveType == EWaveType::Shop)
 	{
 		StartShopWave(CurrentWave);
-		return;
 	}
 
 	StartCombatWave(CurrentWave);
@@ -46,6 +53,7 @@ void AHackNSlashMode::StartCombatWave(const FWaveDefinition& WaveDef)
 {
 	EnemiesToSpawnThisWave = WaveDef.EnemyCount;
 	EnemiesSpawnedThisWave = 0;
+	AliveEnemies = 0;
 
 	GetWorldTimerManager().ClearTimer(WaveSpawnTimer);
 	GetWorldTimerManager().SetTimer(
@@ -60,13 +68,16 @@ void AHackNSlashMode::StartCombatWave(const FWaveDefinition& WaveDef)
 void AHackNSlashMode::StartShopWave(const FWaveDefinition& WaveDef)
 {
 	GetWorldTimerManager().ClearTimer(WaveSpawnTimer);
+	GetWorldTimerManager().ClearTimer(WaveEndTimer);
 
 	OnShopWaveStarted.Broadcast(CurrentWaveIndex + 1);
+
+	OpenShopUI();
 
 	GetWorldTimerManager().SetTimer(
 		WaveEndTimer,
 		this,
-		&AHackNSlashMode::StartNextWave,
+		&AHackNSlashMode::EndShopWaveEarly,
 		WaveDef.ShopDuration,
 		false
 	);
@@ -101,6 +112,7 @@ void AHackNSlashMode::HandleEnemyDestroyed(AActor* DestroyedActor) // OnDestroye
 	const bool bAllSpawned = (EnemiesSpawnedThisWave >= EnemiesToSpawnThisWave);
 	if (bAllSpawned && AliveEnemies == 0)
 	{
+		GetWorldTimerManager().ClearTimer(WaveEndTimer);
 		GetWorldTimerManager().SetTimer(
 			WaveEndTimer,
 			this,
@@ -111,19 +123,87 @@ void AHackNSlashMode::HandleEnemyDestroyed(AActor* DestroyedActor) // OnDestroye
 	}
 }
 
+TArray<UPerkDataAsset*> AHackNSlashMode::BuildShopOffer() const
+{
+	TArray<UPerkDataAsset*> PerkPool;
+	for (UPerkDataAsset* Perk : PurchasablePerks)
+	{
+		if (IsValid(Perk))
+		{
+			PerkPool.Add(Perk);
+		}
+	}
+
+	TArray<UPerkDataAsset*> Offer;
+	const int32 NumToPick = FMath::Min(PerksOfferedPerShop, PerkPool.Num());
+	for (int32 i = 0; i < NumToPick; ++i)
+	{
+		const int32 Index = FMath::RandRange(0, PerkPool.Num() - 1);
+		Offer.Add(PerkPool[Index]);
+		PerkPool.RemoveAtSwap(Index);
+	}
+
+	return Offer;
+}
+
+void AHackNSlashMode::OpenShopUI()
+{
+	if (!ShopMenuClass) return;
+
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+	if (!PlayerController) return;
+
+	UShopMenuUI* ShopWidget = CreateWidget<UShopMenuUI>(PlayerController, ShopMenuClass);
+	if (!ShopWidget) return;
+	
+	ActiveShopWidget = ShopWidget;
+	ShopWidget->OnShopClosed.AddUObject(this, &AHackNSlashMode::EndShopWaveEarly);
+	ShopWidget->AddToViewport();
+	ShopWidget->Init(BuildShopOffer());
+
+	FInputModeUIOnly Mode;
+	Mode.SetWidgetToFocus(ShopWidget->TakeWidget());
+	Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	PlayerController->SetInputMode(Mode);
+	PlayerController->bShowMouseCursor = true;
+}
+
+void AHackNSlashMode::CloseShopUI()
+{
+	if (ActiveShopWidget)
+	{
+		ActiveShopWidget->RemoveFromParent();
+		ActiveShopWidget = nullptr;
+	}
+
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!PlayerController) return;
+
+	PlayerController->SetInputMode(FInputModeGameOnly());
+	PlayerController->bShowMouseCursor = false;
+
+	PlayerController->bEnableClickEvents = false;
+	PlayerController->bEnableMouseOverEvents = false;
+
+	PlayerController->SetIgnoreMoveInput(false);
+	PlayerController->SetIgnoreLookInput(false);
+
+	UWidgetBlueprintLibrary::SetFocusToGameViewport();
+}
+
 TSubclassOf<AEnemy> AHackNSlashMode::PickEnemyForWave(const FWaveDefinition& WaveDef) const // More weight, more frequency
 {
 	TArray<const FEnemySpawnEntry*> Candidates;
 	float TotalWeight = 0.f;
 
-	for (const FEnemySpawnEntry& E : WaveDef.SpawnTable)
+	for (const FEnemySpawnEntry& EnemyEntry : WaveDef.SpawnTable)
 	{
-		if (!E.EnemyClass) continue;
-		if (CurrentWaveIndex + 1 < E.MinWave) continue;
-		if (CurrentWaveIndex + 1 > E.MaxWave) continue;
+		if (!EnemyEntry.EnemyClass) continue;
+		if (CurrentWaveIndex + 1 < EnemyEntry.MinWave) continue;
+		if (CurrentWaveIndex + 1 > EnemyEntry.MaxWave) continue;
 
-		Candidates.Add(&E);
-		TotalWeight += FMath::Max(0.f, E.Weight);
+		Candidates.Add(&EnemyEntry);
+		TotalWeight += FMath::Max(0.f, EnemyEntry.Weight);
 	}
 
 	if (Candidates.Num() == 0 || TotalWeight <= 0.f)
@@ -144,4 +224,23 @@ TSubclassOf<AEnemy> AHackNSlashMode::PickEnemyForWave(const FWaveDefinition& Wav
 	}
 
 	return Candidates.Last()->EnemyClass;
+}
+
+void AHackNSlashMode::RemovePurchasablePerk(UPerkDataAsset* Perk)
+{
+	if (!IsValid(Perk)) return;
+
+	PurchasablePerks.RemoveAll([Perk](UPerkDataAsset* PerkToRemove)
+	{
+		return PerkToRemove == Perk;
+	});
+}
+
+void AHackNSlashMode::EndShopWaveEarly()
+{
+	GetWorldTimerManager().ClearTimer(WaveEndTimer);
+
+	CloseShopUI();
+
+	StartNextWave();
 }

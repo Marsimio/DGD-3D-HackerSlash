@@ -7,6 +7,8 @@
 #include "InputActionValue.h"
 #include "BP_Player.generated.h"
 
+class UPerkComponent;
+class UStatsComponent;
 class UCapsuleComponent;
 class AActor;
 class AEnemy;
@@ -65,7 +67,10 @@ public:
     UFloatingPawnMovement* MovementComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UHealthComponent> HealthComp;
-	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UStatsComponent> StatsComp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UPerkComponent> PerkComp;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
 	float fAttackDamage = 25.0f;
@@ -91,7 +96,6 @@ public:
 	
 private: 
 	void Attack();
-	void DrawEncircleRings() const;
 	void LookAt(const FVector& Location) const;
 	void Move(const FInputActionValue& Value);
 	void RotateRing(float DeltaTime);
