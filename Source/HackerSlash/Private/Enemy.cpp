@@ -14,6 +14,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Navigation/CrowdFollowingComponent.h"
+#include "CurrencyPickup.h"
 
 AEnemy::AEnemy()
 {
@@ -269,5 +270,26 @@ void AEnemy::OnEnemyDied(AActor* DeadActor)
 	{
 		SwarmMgr->UnregisterEnemy(this);
 	}
+
+	// Spawn currency pickup drop
+	if (CurrencyPickupClass)
+	{
+		FVector SpawnLoc = GetActorLocation();
+		SpawnLoc.Z += 20.f;
+
+		const FRotator SpawnRot = FRotator::ZeroRotator;
+
+		FActorSpawnParameters Params;
+		Params.SpawnCollisionHandlingOverride =
+			ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+		ACurrencyPickup* Pickup = GetWorld()->SpawnActor<ACurrencyPickup>(
+			CurrencyPickupClass,
+			SpawnLoc,
+			SpawnRot,
+			Params
+		);
+	}
+
 	Destroy();
 }

@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "BP_Player.generated.h"
 
+class UCurrency;
 class UHealthUI;
 class UPerkComponent;
 class UStatsComponent;
@@ -85,6 +86,9 @@ public:
 	TObjectPtr<UStatsComponent> StatsComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UPerkComponent> PerkComp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UCurrency> CurrencyComp;
+	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat|Slash")
 	float SlashArcDegrees = 90.f;
@@ -133,6 +137,7 @@ private:
 	void OnPlayerDied(AActor* DeadActor);
 	UFUNCTION()
 	void OwnedPerksPressed();
+	void HealPressed();
 
 	// Lunge/attack window
 	bool bAttackActive = false;

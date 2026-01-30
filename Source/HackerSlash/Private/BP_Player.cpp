@@ -3,6 +3,7 @@
 
 #include "BP_Player.h"
 
+#include "Currency.h"
 #include "DebuffComponent.h"
 #include "Enemy.h"
 #include "EngineUtils.h"
@@ -47,7 +48,8 @@ ABP_Player::ABP_Player()
 	MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("MovementComponent"));
 	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComp"));
 	StatsComp = CreateDefaultSubobject<UStatsComponent>(TEXT("StatsComp"));
-	PerkComp  = CreateDefaultSubobject<UPerkComponent>(TEXT("PerkComp"));
+	PerkComp = CreateDefaultSubobject<UPerkComponent>(TEXT("PerkComp"));
+	CurrencyComp = CreateDefaultSubobject<UCurrency>(TEXT("CurrencyComp"));
 }
 
 void ABP_Player::BeginPlay()
@@ -73,16 +75,29 @@ void ABP_Player::BeginPlay()
 	{
 		HealthComp->OnDied.AddDynamic(this, &ABP_Player::OnPlayerDied);
 	}
+	if (CurrencyComp)
+	{
+		CurrencyComp->SetCurrency(0);
+	}
 	
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
-		if (HealthWidgetClass && HealthComp)
+		if (HealthWidgetClass)
 		{
 			HealthWidgetInstance = CreateWidget<UHealthUI>(PlayerController, HealthWidgetClass);
 			if (HealthWidgetInstance)
 			{
 				HealthWidgetInstance->AddToViewport();
-				HealthWidgetInstance->InitWithHealthComponent(HealthComp);
+
+				if (HealthComp)
+				{
+					HealthWidgetInstance->InitWithHealthComponent(HealthComp);
+				}
+
+				if (CurrencyComp)
+				{
+					HealthWidgetInstance->InitWithCurrencyComponent(CurrencyComp);
+				}
 			}
 		}
 	}
@@ -176,6 +191,10 @@ void ABP_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 		{
 			EnhancedInputComponent->BindAction(InputActions.MenuAction, ETriggerEvent::Started, this, &ABP_Player::OwnedPerksPressed);
 		}
+		if (InputActions.HealAction)
+		{
+			EnhancedInputComponent->BindAction(InputActions.HealAction, ETriggerEvent::Started, this, &ABP_Player::HealPressed);
+		}
 	}
 }
 
@@ -223,9 +242,9 @@ void ABP_Player::OnPlayerDied(AActor* DeadActor)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Player Died"));
 
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
-		DisableInput(PC);
+		DisableInput(PlayerController);
 	}
 }
 
@@ -345,10 +364,10 @@ void ABP_Player::Attack()
 	const float MoveSpeed = (StatsComp ? StatsComp->GetStat(EGameStatType::MoveSpeed) : 600.f);
 
 	FVector Forward = GetActorForwardVector();
-	if (APlayerController* PC = Cast<APlayerController>(Controller))
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
 		FHitResult Hit;
-		if (PC->GetHitResultUnderCursor(ECC_Visibility, false, Hit))
+		if (PlayerController->GetHitResultUnderCursor(ECC_Visibility, false, Hit))
 		{
 			FVector Aim = Hit.Location - GetActorLocation();
 			Aim.Z = 0.f;
@@ -377,4 +396,17 @@ void ABP_Player::Attack()
 void ABP_Player::ResetAttack()
 {
 	bCanAttack = true;
+}
+
+
+void ABP_Player::HealPressed()
+{
+	if (!HealthComp || !CurrencyComp) return;
+
+	const int32 HealAmount = CurrencyComp->GetCurrency()*2;
+	if (HealAmount <= 0) return;
+
+	HealthComp->Heal((float)HealAmount);
+
+	CurrencyComp->SetCurrency(0); 
 }

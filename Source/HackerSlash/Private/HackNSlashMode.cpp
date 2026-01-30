@@ -5,6 +5,7 @@
 
 #include "BP_Player.h"
 #include "Enemy.h"
+#include "HealthComponent.h"
 #include "PerkComponent.h"
 #include "PerkDataAsset.h"
 #include "ShopMenuUI.h"
@@ -57,6 +58,7 @@ void AHackNSlashMode::StartNextWave()
 
 void AHackNSlashMode::StartCombatWave(const FWaveDefinition& WaveDef)
 {
+	PlayerPawnRef->HealthComp->Heal(9999);
 	EnemiesToSpawnThisWave = WaveDef.EnemyCount;
 	EnemiesSpawnedThisWave = 0;
 	AliveEnemies = 0;

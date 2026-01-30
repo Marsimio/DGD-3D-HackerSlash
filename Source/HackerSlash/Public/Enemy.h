@@ -10,6 +10,7 @@ class UHealthComponent;
 class APawn;
 class ASwarmManager;
 class UDebuffComponent;
+class ACurrencyPickup;
 
 UCLASS(Blueprintable, BlueprintType)
 class HACKERSLASH_API AEnemy : public ACharacter
@@ -65,6 +66,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI|AttackCommit") // final how far in they want to be in the player
 	float AttackCommitAcceptance = 40.f;
+	
+	UPROPERTY(EditAnywhere, Category="Drops")
+	TSubclassOf<ACurrencyPickup> CurrencyPickupClass;
+
+	UPROPERTY(EditAnywhere, Category="Drops")
+	int32 CurrencyDropAmount = 1;
 
 	virtual void TryStartAttack();
 	virtual void StartAttack();

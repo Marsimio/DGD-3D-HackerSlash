@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "HealthUI.generated.h"
 
+class UCurrency;
 class UProgressBar;
 class UTextBlock;
 class UHealthComponent;
@@ -18,6 +19,9 @@ class HACKERSLASH_API UHealthUI : public UUserWidget
 public:
 	UFUNCTION(BlueprintCallable)
 	void InitWithHealthComponent(UHealthComponent* InHealthComp);
+	
+	UFUNCTION(BlueprintCallable)
+	void InitWithCurrencyComponent(UCurrency* InCurrencyComp);
 
 protected:
 	virtual void NativeDestruct() override;
@@ -27,10 +31,19 @@ protected:
 
 	UPROPERTY(meta=(BindWidgetOptional))
 	UTextBlock* TXT_Health = nullptr;
+	
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* Currency;
 
+
+	UFUNCTION()
+	void HandleCurrencyChanged(int32 NewCurrency);
+	
 private:
 	UPROPERTY()
 	TObjectPtr<UHealthComponent> HealthComp = nullptr;
+	UPROPERTY()
+	TObjectPtr<UCurrency> CurrencyComp;
 
 	UFUNCTION()
 	void HandleHealthChanged(UHealthComponent* Comp, float NewHealth, float Delta, AActor* DamageCauser);

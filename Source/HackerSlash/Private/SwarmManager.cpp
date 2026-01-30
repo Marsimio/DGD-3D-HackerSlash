@@ -111,7 +111,7 @@ void ASwarmManager::ComputeRingForSlot(int32 Slot, float& OutRadius, float& OutA
 		}
 	}
 }
-FVector ASwarmManager::GetGoalForEnemy(const AEnemy* Enemy) const
+FVector ASwarmManager::GetGoalForEnemy(const AEnemy* Enemy) const // positions an enemy in the ring
 {
 	if (!IsValid(TargetPawn))
 	{
@@ -133,7 +133,7 @@ FVector ASwarmManager::GetGoalForEnemy(const AEnemy* Enemy) const
 		DirSign = (RingIndex % 2 == 0) ? 1.f : -1.f;
 	}
 
-	// Stable jitter per enemy
+	// Randomized jitter to seperate enemies apart
 	float Jitter = 0.f;
 	if (IsValid(Enemy) && AngleJitterDeg > 0.f)
 	{

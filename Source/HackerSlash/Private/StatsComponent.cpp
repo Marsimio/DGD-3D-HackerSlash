@@ -24,7 +24,7 @@ void UStatsComponent::BeginPlay()
 	RebuildStats();
 }
 
-float& UStatsComponent::StatRef(FStatBlock& Block, EGameStatType Stat)
+float& UStatsComponent::StatRef(FStatBlock& Block, EGameStatType Stat) // References current stats
 {
 	switch (Stat)
 	{
@@ -36,7 +36,7 @@ float& UStatsComponent::StatRef(FStatBlock& Block, EGameStatType Stat)
 	}
 }
 
-float UStatsComponent::StatVal(const FStatBlock& Block, EGameStatType Stat)
+float UStatsComponent::StatVal(const FStatBlock& Block, EGameStatType Stat) // References base stats for multipliers and bonuses
 {
 	switch (Stat)
 	{
@@ -53,9 +53,9 @@ float UStatsComponent::GetStat(EGameStatType Stat) const
 	return StatVal(FinalStats, Stat);
 }
 
-bool UStatsComponent::HasPerk(FName PerkId) const
+bool UStatsComponent::HasPerk(FName PerkId) const // Used to validate if they have X perk already
 {
-	for (const FAppliedPerk& AppliedPerk : AppliedPerks)
+	for (const FAppliedPerk& AppliedPerk : AppliedPerks) // For every perk being applied
 	{
 		if (AppliedPerk.PerkId == PerkId)
 		{
@@ -65,7 +65,7 @@ bool UStatsComponent::HasPerk(FName PerkId) const
 	return false;
 }
 
-bool UStatsComponent::AddPerk(UPerkDataAsset* Perk)
+bool UStatsComponent::AddPerk(UPerkDataAsset* Perk) // Usually called by stat component after one of its perks is added
 {
 	if (!IsValid(Perk)) return false;
 
@@ -81,7 +81,7 @@ bool UStatsComponent::AddPerk(UPerkDataAsset* Perk)
 	RebuildStats();
 	return true;
 }
-bool UStatsComponent::RemovePerkById(FName PerkId)
+bool UStatsComponent::RemovePerkById(FName PerkId) // gone used and unimplemented in PerkComponent
 {
 	for (int32 i = 0; i < AppliedPerks.Num(); ++i)
 	{
@@ -95,13 +95,13 @@ bool UStatsComponent::RemovePerkById(FName PerkId)
 	return false;
 }
 
-void UStatsComponent::ClearPerks()
+void UStatsComponent::ClearPerks() // Gone unused
 {
 	AppliedPerks.Reset();
 	RebuildStats();
 }
 
-void UStatsComponent::RebuildStats()
+void UStatsComponent::RebuildStats() // To be called when needed (BeginPlay/ Stat Changes). Could be used for debuffs down the line
 {
 	FinalStats = BaseStats;
 
