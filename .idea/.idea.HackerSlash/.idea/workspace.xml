@@ -13,31 +13,7 @@
   <component name="ChangeListManager">
     <list default="true" id="2f0ac21f-0f0e-499c-8af8-0a26510d3b68" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.HackerSlash/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.HackerSlash/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/DefaultGame.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultGame.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/BP_HackNSlash.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/BP_HackNSlash.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Enemies/BP_Goblin.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Enemies/BP_Goblin.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Enemies/BP_Minotaur.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Enemies/BP_Minotaur.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Enemies/Wizard/BP_Wizard.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Enemies/Wizard/BP_Wizard.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Player/MainChar.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Player/MainChar.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Controls/GameplayInputs.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Controls/GameplayInputs.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Data/Perks/DamagePerk.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Data/Perks/DamagePerk.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Data/Perks/HealthPerk.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Data/Perks/HealthPerk.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Data/Perks/SpeedPerk.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Data/Perks/SpeedPerk.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Floor.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Sky.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/SlashWorld.umap" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/WhiteCubeMap.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Widgets/BP_HealthBar.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Widgets/BP_HealthBar.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Private/BP_Player.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Private/BP_Player.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Private/Enemy.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Private/Enemy.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Private/HackNSlashMode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Private/HackNSlashMode.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Private/HealthUI.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Private/HealthUI.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Private/StatsComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Private/StatsComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Private/SwarmManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Private/SwarmManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Public/BP_Player.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Public/BP_Player.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Public/Enemy.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Public/Enemy.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/HackerSlash/Public/HealthUI.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/HackerSlash/Public/HealthUI.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,43 +37,43 @@
     <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Core/Public/Misc/SecureHash.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Core/Public/Stats/Stats.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Classes/Engine/EngineTypes.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/Actor.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/Actor.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/Pawn.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Private/Components/ActorComponent.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/NavigationSystem/Public/NavigationSystem.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/UMG/Private/UserWidget.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/BP_Player.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/Currency.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/CurrencyPickup.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/DebuffComponent.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/Enemy.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/BP_Player.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/Currency.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/CurrencyPickup.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/DebuffComponent.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/Enemy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/Goblin.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/HackNSlashMode.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/HealthComponent.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/HealthUI.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/HackNSlashMode.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/HealthComponent.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/HealthUI.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/MyGameInstance.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/PerkComponent.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/PerkComponent.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/PerkEntryUI.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/ShopMenuUI.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/StatsComponent.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/SwarmManager.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/ShopMenuUI.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/StatsComponent.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/SwarmManager.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Private/Wizard.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/BP_Player.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/Currency.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/CurrencyPickup.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/DebuffComponent.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/Enemy.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/BP_Player.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/Currency.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/CurrencyPickup.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/DebuffComponent.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/Enemy.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/Goblin.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/HackNSlashMode.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/HealthComponent.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/HealthUI.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/MyGameInstance.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/PerkComponent.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/HackNSlashMode.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/HealthComponent.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/HealthUI.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/MyGameInstance.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/PerkComponent.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/PerkDataAsset.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/PerkEntryUI.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/StatsComponent.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/SwarmManager.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/PerkEntryUI.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/StatsComponent.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/SwarmManager.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/HackerSlash/Public/Wizard.h" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="McpProjectServerCommands">
@@ -258,7 +234,7 @@
       <workItem from="1769748810476" duration="435000" />
       <workItem from="1769749276789" duration="9480000" />
       <workItem from="1769781025885" duration="2515000" />
-      <workItem from="1769800822989" duration="9222000" />
+      <workItem from="1769800822989" duration="10253000" />
     </task>
     <servers />
   </component>
